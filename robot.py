@@ -13,17 +13,14 @@ R = robot.Robot()
 #   print(len(markers))
 #   time.sleep(2)
 
-#TIME_FOR_90DEG =   
-#TIME_FOR_1M = 
-  
+# TIME_FOR_90DEG =
+# TIME_FOR_1M =
+
 R.motors[0] = -100
 R.motors[1] = 100
 
-while True:pass
-
 MOTOR_POWER_1 = 100
 MOTOR_POWER_2 = 100
-
 
 
 HOME_WALL_MARKERS = [i + R.zone + 100 for i in range(0, 5)]
@@ -32,45 +29,48 @@ marker = HOME_WALL_MARKER, CUBES_TO_FIND
 
 
 def forward():
-  R.motors[0] = MOTOR_POWER_1 
-  R.motors[1] = MOTOR_POWER_2
-  
-   
+    R.motors[0] = MOTOR_POWER_1
+    R.motors[1] = MOTOR_POWER_2
+
+
 def left():
-  R.motors[0] = MOTOR_POWER_1 
-  R.motors[1] = -MOTOR_POWER_2
-  
+    R.motors[0] = MOTOR_POWER_1
+    R.motors[1] = -MOTOR_POWER_2
+
+
 def right():
-  R.motors[0] = -MOTOR_POWER_1
-  R.motors[1] = MOTOR_POWER_2
-  
+    R.motors[0] = -MOTOR_POWER_1
+    R.motors[1] = MOTOR_POWER_2
+
+
 def backwards():
-  R.motors[0] = -MOTOR_POWER_1 
-  R.motors[1] = -MOTOR_POWER_2
-  
+    R.motors[0] = -MOTOR_POWER_1
+    R.motors[1] = -MOTOR_POWER_2
+
+
 def stop():
-  R.motors[0] = 0
-  R.motors[1] = 0
-  
+    R.motors[0] = 0
+    R.motors[1] = 0
+
+
 def drive_forward():
-  forward()
-  time.sleep(distance * TIME_FOR_1M)
-  stop()
-  
-  
+    forward()
+    time.sleep(distance * TIME_FOR_1M)
+    stop()
+
+
 def turn_clockwise(angle):
     right()
     time.sleep(angle * TIME_FOR_90DEG)
     stop()
-    
-    
-  
+
+
 def align_with_marker(code):
     """`code` - the code of the marker to which the robot should align
     Returns:
      - True if the robot is aligned with the marker
      - False otherwise
-     """
+    """
     for i in range(0, ALIGN_ATTEMPTS):
         markers = R.see(look_for=code)
         if len(markers) == 0:
@@ -81,15 +81,15 @@ def align_with_marker(code):
         # Saw marker but we need to turn to be aligned
         turn_clockwise(marker.bearing.y)
     return False
-    
-    
+
+
 def find_and_face_marker(marker_type):
     """Turn the robot twice round to find a marker of a given marker_type.
     `marker_type` - The marker_type of the marker to look for
     Returns:
      - True: The robot is facing the marker marker_type
      - False: The robot couldn't find the marker
-     """
+    """
     for i in range(0, 720, SEARCH_ANGLE):
         markers = R.see(look_for=marker_type)
         if len(markers) == 0:
@@ -104,6 +104,7 @@ def find_and_face_marker(marker_type):
             print("Lost tracking on marker")
     return False
 
+
 def find_and_face_sheep():
     for i in range(0, 720, SEARCH_ANGLE):
         markers = R.see()
@@ -112,8 +113,7 @@ def find_and_face_sheep():
             print(marker.info.target_type)
             if marker.info.target_type == TARGET_TYPE.SHEEP:
                 sheep.append(marker)
-            
-            
+
         if len(sheep) == 0:
             # No sheep found so turn and we might see one next time
             turn_clockwise(SEARCH_ANGLE)
@@ -125,7 +125,6 @@ def find_and_face_sheep():
             # We couldn't see the marker this time that we looked
             print("Lost tracking on marker")
     return False
-
 
 
 def drive_to_marker(marker, overshoot):
@@ -173,10 +172,8 @@ def go_to_marker(marker_type, overshoot=0.0):
 
         # Maybe we have hit something, so back up and try again
         drive_forward(-STEP_SIZE_M)
-        
-        
-        
-        
+
+
 def main():
     """Forever drive to markers, then drive home. The reverse is included so
     as not to interfere with any other marker which we might have just carried
@@ -189,14 +186,4 @@ def main():
 
 
 main()
-#forward()
-
-
-
-  
-  
-  
-  
-  
-  
-  
+# forward()
