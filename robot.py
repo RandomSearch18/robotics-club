@@ -96,7 +96,7 @@ def align_with_marker(code):
 
 def find_and_face_marker(marker_type):
     """Turn the robot twice round to find a marker of a given marker type.
-    `marker_type` - "sheep" to look for sheep
+    `marker_type` - "sheep" to look for sheep, "home_wall" to look for a wall marker in our area
     Returns:
      - True: The robot is facing the marker marker_type
      - False: The robot couldn't find the marker
@@ -106,8 +106,18 @@ def find_and_face_marker(marker_type):
         # Find the markers that match our given type
         correct_markers = []
         for marker in all_markers:
+            ## SHEEP MARKERS
             if marker_type == "sheep":
                 if marker.info.target_type == TARGET_TYPE.SHEEP:
+                    correct_markers.append(marker)
+            ## HOME WALL MARKERS
+            elif marker_type == "home_wall":
+                if (
+                    # Check that it's a wall marker
+                    marker.info.type == robot.ARENA
+                    # and that it's owned by our team (R.zone is our team)
+                    and marker.info.owning_team == R.zone
+                ):
                     correct_markers.append(marker)
             else:
                 print(f"ERROR: {marker_type} is an invalid marker type")
