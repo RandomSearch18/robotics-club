@@ -3,6 +3,8 @@ import time
 
 R = robot.Robot()
 
+# Commented-out code is for testing the motors
+
 # while True:
 
 #     markers = R.see()
@@ -16,16 +18,25 @@ R = robot.Robot()
 # TIME_FOR_90DEG =
 # TIME_FOR_1M =
 
-R.motors[0] = -100
-R.motors[1] = 100
+# R.motors[0] = -100
+# R.motors[1] = 100
 
-MOTOR_POWER_1 = 100
-MOTOR_POWER_2 = 100
+MOTOR_POWER_1 = 200
+MOTOR_POWER_2 = 200
 
 
-HOME_WALL_MARKERS = [i + R.zone + 100 for i in range(0, 5)]
-CUBES_TO_FIND = [i + R.zone for i in range(0, 5)]
-marker = HOME_WALL_MARKER, CUBES_TO_FIND
+# Number of seconds it take the robot to drive 1 metre
+TIME_FOR_1M = 2.0
+# Number of seconds it take the robot to turn 90 degrees
+TIME_FOR_90DEG = 3.0
+# Number of times the robot should try turning towards a marker before it gives up
+ALIGN_ATTEMPTS = 5
+# The robot will consider itself aligned to a marker if it's facing it head-on (0°) or within ± this number
+ALIGN_TOLERANCE = 10  # degrees
+# Angle that the robot will turn each time when it's scanning for markers
+SEARCH_ANGLE = 45  # degrees
+# How far the robot should drive forward until it stops to check that it's still aligned with the marker
+STEP_SIZE_M = 3
 
 
 def forward():
@@ -53,7 +64,7 @@ def stop():
     R.motors[1] = 0
 
 
-def drive_forward():
+def drive_forward(distance):
     forward()
     time.sleep(distance * TIME_FOR_1M)
     stop()
@@ -84,41 +95,29 @@ def align_with_marker(code):
 
 
 def find_and_face_marker(marker_type):
-    """Turn the robot twice round to find a marker of a given marker_type.
-    `marker_type` - The marker_type of the marker to look for
+    """Turn the robot twice round to find a marker of a given marker type.
+    `marker_type` - "sheep" to look for sheep
     Returns:
      - True: The robot is facing the marker marker_type
      - False: The robot couldn't find the marker
     """
     for i in range(0, 720, SEARCH_ANGLE):
-        markers = R.see(look_for=marker_type)
-        if len(markers) == 0:
+        all_markers = R.see()
+        # Find the markers that match our given type
+        correct_markers = []
+        for marker in all_markers:
+            if marker_type == "sheep":
+                if marker.info.target_type == TARGET_TYPE.SHEEP:
+                    correct_markers.append(marker)
+            else:
+                print(f"ERROR: {marker_type} is an invalid marker type")
+                return False
+
+        if len(correct_markers) == 0:
             # No markers found so turn and we might see one next time
             turn_clockwise(SEARCH_ANGLE)
         else:
-            marker = markers[0]  # The closest marker
-            if align_with_marker(marker.code) is True:
-                # The robot is now facing the marker
-                return marker
-            # We couldn't see the marker this time that we looked
-            print("Lost tracking on marker")
-    return False
-
-
-def find_and_face_sheep():
-    for i in range(0, 720, SEARCH_ANGLE):
-        markers = R.see()
-        sheep = []
-        for marker in markers:
-            print(marker.info.target_type)
-            if marker.info.target_type == TARGET_TYPE.SHEEP:
-                sheep.append(marker)
-
-        if len(sheep) == 0:
-            # No sheep found so turn and we might see one next time
-            turn_clockwise(SEARCH_ANGLE)
-        else:
-            marker = sheep[0]  # The closest marker
+            marker = correct_markers[0]  # The closest marker
             if align_with_marker(marker.code) is True:
                 # The robot is now facing the marker
                 return marker
@@ -151,7 +150,7 @@ def drive_to_marker(marker, overshoot):
 
 
 def go_to_marker(marker_type, overshoot=0.0):
-    """Will turn and drive until the robot is at a marker of the given marker_type.
+    """Will turn and drive until the robot is at a marker of the given marker type.
     `overshoot` - The distance to drive further than the marker. This makes sure
                   that we get there. Negative values will drive short of the
                   marker.
@@ -179,8 +178,8 @@ def main():
     as not to interfere with any other marker which we might have just carried
     home with us."""
     while True:
-        go_to_marker(CUBES_TO_FIND, overshoot=0.1)
-        go_to_marker(HOME_WALL_MARKERS, overshoot=-0.1)
+        go_to_marker("sheep", overshoot=0.1)
+        go_to_marker("home_wall", overshoot=-0.1)
         drive_forward(-0.2)
         turn_clockwise(180)
 
